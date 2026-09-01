@@ -556,7 +556,10 @@
 
 <script>
   let today = new Date();
-  let currentViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+  // 1. Restore the last viewed month from sessionStorage, or default to current month
+  let savedView = sessionStorage.getItem('cycle_tracker_view_date');
+  let currentViewDate = savedView ? new Date(savedView) : new Date(today.getFullYear(), today.getMonth(), 1);
   let activeDateStr = formatDate(today);
 
   let lastPeriodStart = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -673,8 +676,10 @@
     renderAnalytics();
   }
 
+  // 2. Updated month navigation to save the active view date
   function changeMonth(delta) {
     currentViewDate.setMonth(currentViewDate.getMonth() + delta);
+    sessionStorage.setItem('cycle_tracker_view_date', currentViewDate.toISOString());
     renderCalendar();
   }
 
@@ -907,6 +912,7 @@
       try {
         localStorage.removeItem(STORAGE_KEY_LOGS);
         localStorage.removeItem(STORAGE_KEY_SETTINGS);
+        sessionStorage.removeItem('cycle_tracker_view_date');
       } catch (e) {}
       userLogs = {};
       init();
