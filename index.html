@@ -2,11 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>🌸 Cycle Tracker & Analytics ✨</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#fcf4f6">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg-color: #fcf4f6;
@@ -43,6 +49,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Quicksand', -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent; /* Remove blue highlight on tap */
     }
 
     body {
@@ -51,11 +58,12 @@
       background-size: 30px 30px;
       background-position: 0 0, 15px 15px;
       color: var(--text-color);
-      padding: 24px 16px;
+      padding: env(safe-area-inset-top, 16px) 12px env(safe-area-inset-bottom, 24px) 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      overscroll-behavior-y: none; /* Prevents pull-to-refresh on mobile */
     }
 
     .main-wrapper {
@@ -63,37 +71,44 @@
       width: 100%;
     }
 
+    /* Mobile Sticky Navigation */
     .tab-nav {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      margin-bottom: 24px;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 8px;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px;
       border-radius: 30px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 2px solid #ffffff;
-      box-shadow: 0 4px 15px rgba(255, 133, 161, 0.1);
+      box-shadow: 0 4px 15px rgba(255, 133, 161, 0.12);
+      position: sticky;
+      top: 10px;
+      z-index: 100;
     }
 
     .tab-btn {
+      flex: 1;
       background: transparent;
       border: none;
-      padding: 10px 22px;
-      font-size: 0.95rem;
+      padding: 12px 14px;
+      font-size: 0.9rem;
       font-weight: 700;
       font-family: 'Fredoka', sans-serif;
       color: var(--text-muted);
       cursor: pointer;
       border-radius: 20px;
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.2s ease;
+      text-align: center;
+      min-height: 44px; /* Touch target */
     }
 
     .tab-btn.active {
       background: var(--primary);
       color: white;
-      box-shadow: 0 4px 10px rgba(255, 133, 161, 0.4);
-      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(255, 133, 161, 0.35);
     }
 
     .tab-content { display: none; }
@@ -102,7 +117,7 @@
     .app-container {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 16px;
     }
 
     @media (min-width: 768px) {
@@ -113,16 +128,15 @@
 
     .card {
       background: var(--card-bg);
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 10px 25px rgba(186, 120, 143, 0.08);
-      border: 3px solid #ffffff;
-      position: relative;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(186, 120, 143, 0.08);
+      border: 2px solid #ffffff;
     }
 
     .card h2 {
       font-family: 'Fredoka', sans-serif;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       color: #4a3a40;
     }
 
@@ -130,36 +144,32 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .calendar-nav h2 {
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       color: #4a3a40;
     }
 
     .nav-btn {
       background: #fce8ef;
       border: none;
-      padding: 8px 16px;
-      border-radius: 16px;
+      padding: 10px 18px;
+      border-radius: 14px;
       cursor: pointer;
       font-weight: 700;
       color: var(--primary);
-      transition: all 0.2s;
-    }
-
-    .nav-btn:hover {
-      background: var(--primary);
-      color: white;
+      min-height: 44px;
+      font-size: 0.9rem;
     }
 
     .settings-card {
       background: #fff9fb;
       border: 2px dashed #f1d1dc;
       border-radius: 16px;
-      padding: 12px 16px;
-      margin-bottom: 18px;
+      padding: 12px;
+      margin-bottom: 14px;
       font-size: 0.85rem;
     }
 
@@ -168,6 +178,8 @@
       color: #7a5c66;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      min-height: 36px;
       cursor: pointer;
     }
 
@@ -188,35 +200,40 @@
     }
 
     .settings-grid input {
-      padding: 6px 10px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 12px;
       border: 1.5px solid var(--border-color);
       outline: none;
       font-weight: 600;
+      font-size: 0.9rem;
     }
 
     .legend {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      margin-bottom: 18px;
+      gap: 8px 12px;
+      margin-bottom: 14px;
       font-size: 0.75rem;
       font-weight: 700;
     }
 
-    .legend-item { display: flex; align-items: center; gap: 5px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
+      gap: 4px;
+    }
+
+    @media (min-width: 480px) {
+      .calendar-grid { gap: 8px; }
     }
 
     .day-header {
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: #b09ba4;
       padding-bottom: 4px;
@@ -225,29 +242,27 @@
 
     .calendar-day {
       aspect-ratio: 1;
-      border-radius: 16px;
+      border-radius: 12px;
       border: 2px solid transparent;
-      padding: 5px;
+      padding: 4px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
       position: relative;
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      touch-action: manipulation;
     }
 
-    .calendar-day:hover:not(.empty) { transform: scale(1.08); z-index: 2; }
     .calendar-day.empty { background: transparent; cursor: default; }
-    .calendar-day.today { border: 2.5px solid var(--primary) !important; }
-    .calendar-day.selected { transform: scale(1.05); box-shadow: 0 0 0 3px #ff85a1; z-index: 3; }
+    .calendar-day.today { border: 2px solid var(--primary) !important; }
+    .calendar-day.selected { box-shadow: 0 0 0 3px #ff85a1; z-index: 3; }
 
-    .day-num { font-size: 0.9rem; font-weight: 700; font-family: 'Fredoka', sans-serif; }
-    .cycle-num { font-size: 0.65rem; font-weight: 700; opacity: 0.8; }
+    .day-num { font-size: 0.85rem; font-weight: 700; font-family: 'Fredoka', sans-serif; }
+    .cycle-num { font-size: 0.6rem; font-weight: 700; opacity: 0.85; }
 
     .symptom-indicator {
-      width: 6px; height: 6px; border-radius: 50%; background-color: var(--primary);
-      position: absolute; bottom: 5px; right: 6px;
-      box-shadow: 0 0 4px rgba(255, 133, 161, 0.8);
+      width: 5px; height: 5px; border-radius: 50%; background-color: var(--primary);
+      position: absolute; bottom: 4px; right: 4px;
     }
 
     .phase-menstrual { background: var(--menstrual-bg); border-color: var(--menstrual-border); color: var(--menstrual-color); }
@@ -262,64 +277,64 @@
     .dot-ovulation { background: var(--ovulation-color); }
     .dot-luteal { background: var(--luteal-color); }
 
-    .detail-header { border-bottom: 2px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 16px; }
-    .date-title { font-size: 1.15rem; font-weight: 700; font-family: 'Fredoka', sans-serif; color: #4a3a40; }
-    .phase-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-top: 6px; }
-    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin: 16px 0 8px 0; }
+    .detail-header { border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 12px; }
+    .date-title { font-size: 1.1rem; font-weight: 700; font-family: 'Fredoka', sans-serif; color: #4a3a40; }
+    .phase-badge { display: inline-block; padding: 4px 10px; border-radius: 16px; font-size: 0.75rem; font-weight: 700; margin-top: 4px; }
+    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin: 14px 0 6px 0; }
     
-    .flow-buttons, .symptom-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .flow-buttons, .symptom-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag-btn {
       background: #f7ebf0;
       border: none;
-      padding: 7px 12px;
+      padding: 10px 14px;
       border-radius: 20px;
       font-size: 0.8rem;
       font-weight: 700;
       color: #6b535d;
       cursor: pointer;
-      transition: all 0.2s;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
     }
 
-    .tag-btn:hover { background: #f3dbe3; }
     .tag-btn.active { background: var(--primary); color: white; box-shadow: 0 3px 8px rgba(255, 133, 161, 0.4); }
 
     textarea {
-      width: 100%; height: 75px;
+      width: 100%; height: 80px;
       border: 2px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 10px;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       resize: none;
       outline: none;
       background: #fffdfd;
-      transition: border-color 0.2s;
     }
 
     textarea:focus { border-color: var(--primary); }
-    .status-msg { margin-top: 8px; font-size: 0.75rem; font-weight: 700; color: #38a169; display: none; }
+    .status-msg { margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: #38a169; display: none; }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 16px;
     }
 
     .stat-card {
       background: #fff8fa;
       border: 2px solid #fce8ef;
-      border-radius: 18px;
-      padding: 16px;
+      border-radius: 16px;
+      padding: 12px;
       text-align: center;
     }
 
     .stat-value {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
       font-family: 'Fredoka', sans-serif;
       color: var(--primary);
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .stat-label {
@@ -329,23 +344,21 @@
       text-transform: uppercase;
     }
 
-    .chart-container { margin-top: 20px; }
-
     .symptom-bar-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      font-size: 0.85rem;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
       font-weight: 600;
     }
 
-    .bar-label { width: 110px; }
+    .bar-label { width: 95px; }
     .bar-track {
       flex: 1;
-      height: 14px;
+      height: 12px;
       background: #f7ebf0;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
       padding: 2px;
     }
@@ -353,27 +366,34 @@
     .bar-fill {
       height: 100%;
       background: linear-gradient(90deg, #ff85a1, #ff6b8b);
-      border-radius: 8px;
-      transition: width 0.4s ease-out;
+      border-radius: 6px;
     }
 
     .bar-count {
-      width: 35px;
+      width: 30px;
       text-align: right;
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
+    }
+
+    /* Mobile Table Scroll Container */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
     }
 
     .history-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 0.85rem;
+      min-width: 480px; /* Force touch scroll on small devices */
+      font-size: 0.8rem;
     }
 
     .history-table th, .history-table td {
-      padding: 12px 10px;
+      padding: 10px 8px;
       text-align: left;
     }
 
@@ -392,12 +412,14 @@
       background: #fff0f0;
       color: #e53e3e;
       border: 1px solid #feb2b2;
-      padding: 6px 12px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 14px;
       font-weight: 700;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       cursor: pointer;
-      margin-top: 15px;
+      margin-top: 16px;
+      width: 100%;
+      min-height: 44px;
     }
   </style>
 </head>
@@ -406,7 +428,7 @@
 <div class="main-wrapper">
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('calendar-tab', event)">🗓️ Calendar</button>
-    <button class="tab-btn" onclick="switchTab('history-tab', event)">📊 Insights & History</button>
+    <button class="tab-btn" onclick="switchTab('history-tab', event)">📊 Analytics</button>
   </div>
 
   <div id="calendar-tab" class="tab-content active">
@@ -459,7 +481,7 @@
         </div>
 
         <div class="section-title">Expected Phase Info</div>
-        <p id="phase-desc" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">Click any day to log symptoms.</p>
+        <p id="phase-desc" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 8px;">Tap any day to log symptoms.</p>
 
         <div class="section-title">Flow Level 🩸</div>
         <div class="flow-buttons">
@@ -488,44 +510,46 @@
   </div>
 
   <div id="history-tab" class="tab-content">
-    <div class="card" style="margin-bottom: 20px;">
-      <h2>🌸 Cycle Summary & Trends</h2>
+    <div class="card" style="margin-bottom: 16px;">
+      <h2>🌸 Cycle Summary</h2>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Configured Cycle</div>
+          <div class="stat-label">Cycle</div>
           <div class="stat-value" id="stat-cycle-len">28 Days</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Period Duration</div>
+          <div class="stat-label">Period</div>
           <div class="stat-value" id="stat-period-len">5 Days</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Days Logged</div>
+          <div class="stat-label">Logged</div>
           <div class="stat-value" id="stat-logged-days">0 Days</div>
         </div>
       </div>
 
       <div class="chart-container">
-        <div class="section-title" style="margin-bottom: 12px;">Most Frequent Symptoms 📊</div>
+        <div class="section-title" style="margin-bottom: 10px;">Frequent Symptoms 📊</div>
         <div id="symptom-bar-chart"></div>
       </div>
     </div>
 
     <div class="card">
       <h2>📜 Cycle History Log</h2>
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th style="border-radius: 12px 0 0 12px;">Date</th>
-            <th>Cycle Day</th>
-            <th>Flow</th>
-            <th>Symptoms</th>
-            <th style="border-radius: 0 12px 12px 0;">Notes</th>
-          </tr>
-        </thead>
-        <tbody id="history-table-body"></tbody>
-      </table>
-      <button class="danger-btn" onclick="clearAllData()">🗑️ Clear All Browser Data</button>
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th style="border-radius: 10px 0 0 10px;">Date</th>
+              <th>Cycle Day</th>
+              <th>Flow</th>
+              <th>Symptoms</th>
+              <th style="border-radius: 0 10px 10px 0;">Notes</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body"></tbody>
+        </table>
+      </div>
+      <button class="danger-btn" onclick="clearAllData()">🗑️ Clear All Local Data</button>
     </div>
   </div>
 </div>
@@ -535,7 +559,6 @@
   let currentViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
   let activeDateStr = formatDate(today);
 
-  // Default values
   let lastPeriodStart = new Date(today.getFullYear(), today.getMonth(), 1);
   let averageCycleLength = 28;
   let periodLength = 5;
@@ -543,37 +566,44 @@
   let lutealLength = 14;
   let userLogs = {};
 
-  // LOCAL STORAGE KEYS
   const STORAGE_KEY_LOGS = 'cycle_tracker_user_logs';
   const STORAGE_KEY_SETTINGS = 'cycle_tracker_settings';
 
   function loadFromLocalStorage() {
-    const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      if (parsed.lastPeriodStart) lastPeriodStart = new Date(parsed.lastPeriodStart);
-      if (parsed.averageCycleLength) averageCycleLength = parsed.averageCycleLength;
-      if (parsed.periodLength) periodLength = parsed.periodLength;
-      if (parsed.fertileDaysBefore) fertileDaysBefore = parsed.fertileDaysBefore;
-      if (parsed.lutealLength) lutealLength = parsed.lutealLength;
-    }
+    try {
+      const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.lastPeriodStart) lastPeriodStart = new Date(parsed.lastPeriodStart);
+        if (parsed.averageCycleLength) averageCycleLength = parsed.averageCycleLength;
+        if (parsed.periodLength) periodLength = parsed.periodLength;
+        if (parsed.fertileDaysBefore) fertileDaysBefore = parsed.fertileDaysBefore;
+        if (parsed.lutealLength) lutealLength = parsed.lutealLength;
+      }
 
-    const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
-    if (savedLogs) {
-      userLogs = JSON.parse(savedLogs);
+      const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+      if (savedLogs) {
+        userLogs = JSON.parse(savedLogs);
+      }
+    } catch (e) {
+      console.warn("Storage warning:", e);
     }
   }
 
   function saveToLocalStorage() {
-    const settings = {
-      lastPeriodStart: formatDate(lastPeriodStart),
-      averageCycleLength,
-      periodLength,
-      fertileDaysBefore,
-      lutealLength
-    };
-    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-    localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(userLogs));
+    try {
+      const settings = {
+        lastPeriodStart: formatDate(lastPeriodStart),
+        averageCycleLength,
+        periodLength,
+        fertileDaysBefore,
+        lutealLength
+      };
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(userLogs));
+    } catch (e) {
+      console.warn("Unable to write storage:", e);
+    }
   }
 
   function init() {
@@ -829,15 +859,15 @@
     });
 
     const chartContainer = document.getElementById('symptom-bar-chart');
-    chartContainer.innerHTML = '';
     const maxCount = Math.max(...Object.values(counts), 1);
+    let chartHTML = '';
 
     if (Object.keys(counts).length === 0) {
-      chartContainer.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No symptoms logged yet.</p>';
+      chartHTML = '<p style="font-size:0.8rem; color:var(--text-muted);">No symptoms logged yet.</p>';
     } else {
       Object.entries(counts).forEach(([symptom, count]) => {
         const pct = (count / maxCount) * 100;
-        chartContainer.innerHTML += `
+        chartHTML += `
           <div class="symptom-bar-row">
             <div class="bar-label">${symptom}</div>
             <div class="bar-track"><div class="bar-fill" style="width: ${pct}%;"></div></div>
@@ -846,9 +876,10 @@
         `;
       });
     }
+    chartContainer.innerHTML = chartHTML;
 
     const tbody = document.getElementById('history-table-body');
-    tbody.innerHTML = '';
+    let rowsHTML = '';
 
     if (loggedDates.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No logs recorded yet.</td></tr>';
@@ -858,7 +889,7 @@
     loggedDates.sort().reverse().forEach(d => {
       const l = userLogs[d];
       const info = calculateCycleInfo(d);
-      tbody.innerHTML += `
+      rowsHTML += `
         <tr>
           <td><strong>${d}</strong></td>
           <td>${info.day ? 'Day ' + info.day : '--'}</td>
@@ -868,12 +899,15 @@
         </tr>
       `;
     });
+    tbody.innerHTML = rowsHTML;
   }
 
   function clearAllData() {
     if (confirm('Are you sure you want to clear all your saved cycle logs and settings?')) {
-      localStorage.removeItem(STORAGE_KEY_LOGS);
-      localStorage.removeItem(STORAGE_KEY_SETTINGS);
+      try {
+        localStorage.removeItem(STORAGE_KEY_LOGS);
+        localStorage.removeItem(STORAGE_KEY_SETTINGS);
+      } catch (e) {}
       userLogs = {};
       init();
     }
